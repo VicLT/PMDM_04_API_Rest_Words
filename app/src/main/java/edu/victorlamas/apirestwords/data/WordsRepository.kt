@@ -35,10 +35,10 @@ class WordsRepository(
     }
 
     fun getWords(): StateFlow<List<Word>> {
-        return localDataSource.getAllWords()
+        return localDataSource.getAllWords() as StateFlow<List<Word>>
     }
 
-    fun getWordById(idWord: Int): Flow<Word?> {
-        return localDataSource.getWordById(idWord)
+    suspend fun deleteWord(word: Word) {
+        localDataSource.deleteWord(word)
     }
 }

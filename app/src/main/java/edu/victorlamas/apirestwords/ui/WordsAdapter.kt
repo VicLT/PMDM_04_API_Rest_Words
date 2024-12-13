@@ -1,9 +1,11 @@
 package edu.victorlamas.apirestwords.ui
 
+import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import edu.victorlamas.apirestwords.model.PalabraItem
+import androidx.recyclerview.widget.RecyclerView
+import edu.victorlamas.apirestwords.databinding.WordItemBinding
 import edu.victorlamas.apirestwords.model.Word
 
 /**
@@ -18,19 +20,25 @@ class WordsAdapter(
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
-    ): WordsAdapter.WordsViewHolder {
-        TODO("Not yet implemented")
+    ): WordsViewHolder {
+        return WordsViewHolder(
+            WordItemBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            )
+        )
     }
 
-    override fun onBindViewHolder(
-        holder: WordsAdapter.WordsViewHolder,
-        position: Int
-    ) {
-        TODO("Not yet implemented")
+    override fun onBindViewHolder(holder: WordsViewHolder, position: Int) {
+        holder.bind(getItem(position))
     }
 
-    inner class WordsViewHolder {
+    inner class WordsViewHolder(private val binding: WordItemBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+            fun bind(word: Word) {
 
+        }
     }
 }
 
@@ -39,12 +47,12 @@ class WordsAdapter(
  * Compara dos palabras por su ID.
  * @author Víctor Lamas
  */
-class WordsDiffCallback : DiffUtil.ItemCallback<PalabraItem>() {
-    override fun areItemsTheSame(oldItem: PalabraItem, newItem: PalabraItem): Boolean {
-        return oldItem.idWord == newItem.idWord
+class WordsDiffCallback : DiffUtil.ItemCallback<Word>() {
+    override fun areItemsTheSame(oldItem: Word, newItem: Word): Boolean {
+        return oldItem.idPalabra == newItem.idPalabra
     }
 
-    override fun areContentsTheSame(oldItem: PalabraItem, newItem: PalabraItem): Boolean {
+    override fun areContentsTheSame(oldItem: Word, newItem: Word): Boolean {
         return oldItem == newItem
     }
 }

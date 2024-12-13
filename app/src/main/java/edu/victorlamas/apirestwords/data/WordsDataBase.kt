@@ -2,12 +2,13 @@ package edu.victorlamas.apirestwords.data
 
 import androidx.room.Dao
 import androidx.room.Database
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.RoomDatabase
 import edu.victorlamas.apirestwords.model.Word
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
 
 /**
  * Class WordsDataBase.kt
@@ -16,7 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
  */
 @Database(entities = [Word::class], version = 1)
 abstract class WordsDatabase : RoomDatabase() {
-    abstract fun wordDao(): WordDao
+    abstract fun wordDao(): WordsDao
 }
 
 /**
@@ -24,13 +25,13 @@ abstract class WordsDatabase : RoomDatabase() {
  * @author Víctor Lamas
  */
 @Dao
-interface WordDao {
+interface WordsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertWord(word: Word)
 
     @Query("SELECT * FROM Word")
-    fun getAllWords(): StateFlow<List<Word>>
+    fun getAllWords(): Flow<List<Word>>
 
-    @Query("SELECT * FROM Word WHERE idPalabra = :idPalabra")
-    suspend fun getWordByIdWord(idPalabra: Int): Word?
+    @Delete
+    suspend fun deleteWord(word: Word)
 }

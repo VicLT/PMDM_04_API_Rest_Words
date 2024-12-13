@@ -15,8 +15,10 @@ class Retrofit2Api {
         private const val BASE_URL = "https://www.javiercarrasco.es/api/words/"
 
         fun getRetrofit2Api(): Retrofit2ApiInterface {
-            return Retrofit.Builder().baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create()).build()
+            return Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
                 .create(Retrofit2ApiInterface::class.java)
         }
     }

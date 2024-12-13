@@ -1,8 +1,7 @@
 package edu.victorlamas.apirestwords.data
 
 import edu.victorlamas.apirestwords.model.Word
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.Flow
 
 /**
  * Class LocalDataSource.kt
@@ -11,16 +10,16 @@ import kotlinx.coroutines.flow.flow
  *
  * @param db Funciones heredadas de WordsDataBase.
  */
-class LocalDataSource(private val db: WordDao) {
+class LocalDataSource(private val db: WordsDao) {
     suspend fun insertWord(word: Word) {
         db.insertWord(word)
     }
 
-    fun getAllWords(): StateFlow<List<Word>> {
+    fun getAllWords(): Flow<List<Word>> {
         return db.getAllWords()
     }
 
-    fun getWordById(id: Int) = flow {
-        emit(db.getWordByIdWord(id))
+    suspend fun deleteWord(word: Word) {
+        db.deleteWord(word)
     }
 }
