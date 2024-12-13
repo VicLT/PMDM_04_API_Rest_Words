@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:drawable="@drawable/favorite_off"
+        android:state_enabled="false"
+        app:state_on="false" />
+
+    <item
+        android:drawable="@drawable/favorite_on"
+        android:state_enabled="true"
+        app:state_on="true" />
+</selector>

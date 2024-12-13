@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">API Rest Words</string>
+    <string name="txt_optBottom_all">Todas las palabras</string>
+    <string name="txt_favorites">Palabras favoritas</string>
+    <string name="txt_noConnection">Sin conexión a Internet</string>
+    <string name="txt_opt_sort">Ordenar alfabéticamente</string>
+    <string name="txt_opt_random">Una palabra al azar</string>
+    <string name="txt_desc_fav">Marcar favorito</string>
+</resources>

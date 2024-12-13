@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/opt_sort"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:icon="@drawable/sort_by_name"
+        android:title="@string/txt_opt_sort"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/opt_random"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:icon="@drawable/ic_random"
+        android:title="@string/txt_opt_random"
+        app:showAsAction="ifRoom" />
+</menu>
