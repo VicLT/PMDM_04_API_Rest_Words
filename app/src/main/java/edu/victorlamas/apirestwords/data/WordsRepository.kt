@@ -4,7 +4,6 @@ import edu.victorlamas.apirestwords.model.Palabras
 import edu.victorlamas.apirestwords.model.Word
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -19,7 +18,7 @@ class WordsRepository(
     private val remoteDataSource: RemoteDataSource,
     private val localDataSource: LocalDataSource
 ) {
-    fun fetchWords(): Flow<Palabras> {
+    fun fetchWords(): Flow<List<Palabras>> {
         return remoteDataSource.fetchWords()
     }
 
@@ -34,8 +33,8 @@ class WordsRepository(
         delay(10)
     }
 
-    fun getWords(): StateFlow<List<Word>> {
-        return localDataSource.getAllWords() as StateFlow<List<Word>>
+    fun getWords(): Flow<List<Word>> {
+        return localDataSource.getAllWords()
     }
 
     suspend fun deleteWord(word: Word) {
