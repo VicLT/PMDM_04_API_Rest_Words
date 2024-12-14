@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
     private fun getWords() {
         adapter.submitList(emptyList())
         if (checkConnection(this)) {
-            adapter.submitList(vm.getAllWords())
+            adapter.submitList(vm.words.value)
         } else {
             binding.swipeRefresh.isRefreshing = false
             Toast.makeText(

@@ -1,6 +1,6 @@
 package edu.victorlamas.apirestwords.data
 
-import edu.victorlamas.apirestwords.model.Palabras
+import edu.victorlamas.apirestwords.model.Word
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
@@ -30,5 +30,5 @@ class Retrofit2Api {
  */
 interface Retrofit2ApiInterface {
     @GET("all")
-    suspend fun getWords(): Palabras
+    suspend fun getWords(): List<Word>
 }

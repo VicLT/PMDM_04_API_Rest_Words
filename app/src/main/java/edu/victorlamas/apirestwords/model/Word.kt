@@ -15,13 +15,13 @@ data class Word(
     @SerializedName("idWord")
     @PrimaryKey(autoGenerate = true)
     var idPalabra: Int = 0,
-    @SerializedName("palabra")
-    var palabra: String? = null,
-    @SerializedName("definicion")
-    var definicion: String? = null,
+    @SerializedName("word")
+    var word: String? = null,
+    @SerializedName("definition")
+    var definition: String? = null,
     @Ignore
-    var favorita: Boolean = false
-) {
-    constructor(idPalabra: Int, palabra: String?, definicion: String?) :
-            this(idPalabra, palabra, definicion, false)
-}
+    var favourite: Boolean = false
+) /*{
+    constructor(idWord: Int, word: String?, definition: String?) :
+            this(idWord, word, definition, false)
+}*/

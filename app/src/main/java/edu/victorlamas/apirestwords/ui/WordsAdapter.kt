@@ -37,7 +37,7 @@ class WordsAdapter(
     inner class WordsViewHolder(private val binding: WordItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
             fun bind(word: Word) {
-                binding.tvWord.text = word.palabra
+                binding.tvWord.text = word.word
         }
     }
 }

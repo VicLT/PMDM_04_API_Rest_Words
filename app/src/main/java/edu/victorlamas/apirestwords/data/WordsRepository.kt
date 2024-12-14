@@ -1,6 +1,5 @@
 package edu.victorlamas.apirestwords.data
 
-import edu.victorlamas.apirestwords.model.Palabras
 import edu.victorlamas.apirestwords.model.Word
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -18,7 +17,7 @@ class WordsRepository(
     private val remoteDataSource: RemoteDataSource,
     private val localDataSource: LocalDataSource
 ) {
-    fun fetchWords(): Flow<List<Palabras>> {
+    fun fetchWords(): Flow<List<Word>> {
         return remoteDataSource.fetchWords()
     }
 
