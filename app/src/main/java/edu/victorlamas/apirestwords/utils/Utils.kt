@@ -27,9 +27,9 @@ fun checkConnection(context: Context): Boolean {
     return false
 }
 
-enum class ShowsFilter {
+enum class WordsFilter {
     ALPHABETICAL_ASCENDANT,
-    ALPAHABETICAL_DESCENDANT
+    ALPHABETICAL_DESCENDANT
 }
 
-var showsFilter = ShowsFilter.ALPHABETICAL_ASCENDANT
+var wordsFilter = WordsFilter.ALPHABETICAL_ASCENDANT

@@ -1,13 +1,17 @@
 package edu.victorlamas.apirestwords.ui
 
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import edu.victorlamas.apirestwords.data.WordsRepository
 import edu.victorlamas.apirestwords.model.Word
+import edu.victorlamas.apirestwords.utils.WordsFilter
+import edu.victorlamas.apirestwords.utils.wordsFilter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -41,6 +45,14 @@ class MainViewModel (private val repository: WordsRepository) : ViewModel() {
                     }
                     remoteWord.favourite = wordAux != null
                 }
+                /*val sortedWords = when (wordsFilter) {
+                    WordsFilter.ALPHABETICAL_ASCENDANT -> remoteWords.sortedBy {
+                            word -> word.word?.uppercase()
+                    }
+                    WordsFilter.ALPHABETICAL_DESCENDANT -> remoteWords.sortedByDescending {
+                            word -> word.word?.uppercase()
+                    }
+                }*/
                 _words.value = remoteWords
             }.collect()
         }

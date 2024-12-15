@@ -17,7 +17,9 @@ import edu.victorlamas.apirestwords.data.LocalDataSource
 import edu.victorlamas.apirestwords.data.RemoteDataSource
 import edu.victorlamas.apirestwords.data.WordsRepository
 import edu.victorlamas.apirestwords.databinding.ActivityMainBinding
+import edu.victorlamas.apirestwords.utils.WordsFilter
 import edu.victorlamas.apirestwords.utils.checkConnection
+import edu.victorlamas.apirestwords.utils.wordsFilter
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -83,6 +85,23 @@ class MainActivity : AppCompatActivity() {
                 getWords()
             }
         }
+
+        binding.mToolbar.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.opt_sort -> {
+                    wordsFilter = if (wordsFilter == WordsFilter.ALPHABETICAL_ASCENDANT) {
+                        WordsFilter.ALPHABETICAL_DESCENDANT
+                    } else {
+                        WordsFilter.ALPHABETICAL_ASCENDANT
+                    }
+                    lifecycleScope.launch {
+                        getWords()
+                    }
+                    true
+                }
+                else -> false
+            }
+        }
     }
 
     /**
@@ -93,6 +112,20 @@ class MainActivity : AppCompatActivity() {
         if (checkConnection(this)) {
             binding.swipeRefresh.isRefreshing = true
             vm.words.collect { words ->
+                /*val sortedWords = when (wordsFilter) {
+                    WordsFilter.ALPHABETICAL_ASCENDANT -> words.sortedBy {
+                        word -> word.word }
+                    WordsFilter.ALPHABETICAL_DESCENDANT -> words.sortedByDescending {
+                        word -> word.word }
+                }
+                adapter.submitList(sortedWords)*/
+
+                /*when (wordsFilter) {
+                    WordsFilter.ALPHABETICAL_ASCENDANT -> words.sortedBy {
+                        word -> word.word }
+                    WordsFilter.ALPHABETICAL_DESCENDANT -> words.sortedByDescending {
+                        word -> word.word }
+                }*/
                 adapter.submitList(words)
                 binding.swipeRefresh.isRefreshing = false
             }

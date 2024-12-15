@@ -3,11 +3,9 @@ package edu.victorlamas.apirestwords.ui
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.snackbar.Snackbar
 import edu.victorlamas.apirestwords.R
 import edu.victorlamas.apirestwords.databinding.WordItemBinding
 import edu.victorlamas.apirestwords.model.Word
