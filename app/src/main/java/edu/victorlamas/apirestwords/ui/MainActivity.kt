@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -32,10 +33,19 @@ class MainActivity : AppCompatActivity() {
 
     private val adapter = WordsAdapter(
         onClick = { word ->
-
+            AlertDialog.Builder(this)
+                .setTitle(word.word)
+                .setMessage(word.definition)
+                .setPositiveButton(getString(R.string.btn_alert_dialog), null)
+                .show()
         },
         onClickFav = { word ->
-
+            if (word.favourite) {
+                vm.deleteWord(word)
+            } else {
+                vm.saveWord(word)
+            }
+            word.favourite = !word.favourite
         }
     )
 
@@ -65,14 +75,27 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        binding.swipeRefresh.setOnRefreshListener {
+            lifecycleScope.launch {
+                getWords()
+            }
+        }
+    }
+
     /**
      * Obtiene las palabras y las muestra en el RecyclerView.
      * @author Víctor Lamas
      */
-    private fun getWords() {
-        adapter.submitList(emptyList())
+    private suspend fun getWords() {
         if (checkConnection(this)) {
-            adapter.submitList(vm.words.value)
+            binding.swipeRefresh.isRefreshing = true
+            vm.words.collect { words ->
+                adapter.submitList(words)
+                binding.swipeRefresh.isRefreshing = false
+            }
         } else {
             binding.swipeRefresh.isRefreshing = false
             Toast.makeText(

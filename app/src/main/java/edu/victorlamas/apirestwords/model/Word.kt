@@ -14,7 +14,7 @@ import com.google.gson.annotations.SerializedName
 data class Word(
     @SerializedName("idWord")
     @PrimaryKey(autoGenerate = true)
-    var idPalabra: Int = 0,
+    var idWord: Int = 0,
     @SerializedName("word")
     var word: String? = null,
     @SerializedName("definition")

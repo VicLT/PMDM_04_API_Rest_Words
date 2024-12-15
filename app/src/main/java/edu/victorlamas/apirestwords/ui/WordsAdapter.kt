@@ -1,10 +1,14 @@
 package edu.victorlamas.apirestwords.ui
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
+import edu.victorlamas.apirestwords.R
 import edu.victorlamas.apirestwords.databinding.WordItemBinding
 import edu.victorlamas.apirestwords.model.Word
 
@@ -26,7 +30,7 @@ class WordsAdapter(
                 LayoutInflater.from(parent.context),
                 parent,
                 false
-            )
+            ).root
         )
     }
 
@@ -34,13 +38,24 @@ class WordsAdapter(
         holder.bind(getItem(position))
     }
 
-    inner class WordsViewHolder(private val binding: WordItemBinding) :
-        RecyclerView.ViewHolder(binding.root) {
+    inner class WordsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        private val bind = WordItemBinding.bind(view)
             fun bind(word: Word) {
-                binding.tvWord.text = word.word
+                bind.tvWord.text = word.word
+                bind.root.setOnClickListener {
+                    onClick(word)
+                }
+                bind.ivFav.setOnClickListener {
+                    onClickFav(word)
+                    notifyItemChanged(adapterPosition)
+                }
+                bind.ivFav.setImageState(
+                    intArrayOf(R.attr.state_on),
+                    word.favourite
+                )
+            }
         }
     }
-}
 
 /**
  * Class WordsAdapter.kt
@@ -49,7 +64,7 @@ class WordsAdapter(
  */
 class WordsDiffCallback : DiffUtil.ItemCallback<Word>() {
     override fun areItemsTheSame(oldItem: Word, newItem: Word): Boolean {
-        return oldItem.idPalabra == newItem.idPalabra
+        return oldItem.idWord == newItem.idWord
     }
 
     override fun areContentsTheSame(oldItem: Word, newItem: Word): Boolean {
