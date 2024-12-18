@@ -2,7 +2,6 @@ package edu.victorlamas.apirestwords.ui
 
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -51,7 +50,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        //enableEdgeToEdge()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
@@ -83,7 +82,7 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                getWords()
+                getAllWords()
             }
         }
     }
@@ -93,7 +92,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.swipeRefresh.setOnRefreshListener {
             lifecycleScope.launch {
-                getWords()
+                getAllWords()
             }
         }
 
@@ -106,8 +105,29 @@ class MainActivity : AppCompatActivity() {
                         WordsFilter.ALPHABETICAL_ASCENDANT
                     }
                     lifecycleScope.launch {
-                        getWords()
+                        getAllWords()
                     }
+                    true
+                }
+                else -> false
+            }
+        }
+
+        binding.bottomNavigationView.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.optBottom_all -> {
+                    lifecycleScope.launch {
+                        getAllWords()
+                    }
+                    true
+                }
+                R.id.opt_favorites -> {
+                    lifecycleScope.launch {
+                        vm.favWords.collect { favWords ->
+                            adapter.submitList(favWords)
+                        }
+                    }
+                    //adapter.submitList(vm.favWords)
                     true
                 }
                 else -> false
@@ -119,7 +139,7 @@ class MainActivity : AppCompatActivity() {
      * Obtiene las palabras, las ordena y las muestra en el RecyclerView.
      * @author Víctor Lamas
      */
-    private suspend fun getWords() {
+    private suspend fun getAllWords() {
         adapter.submitList(emptyList())
         if (checkConnection(this)) {
             binding.swipeRefresh.isRefreshing = true
@@ -157,5 +177,13 @@ class MainActivity : AppCompatActivity() {
                 Toast.LENGTH_SHORT
             ).show()
         }
+    }
+
+    /**
+     * Obtiene las palabras favoritas, las ordena y las muestra en el RecyclerView.
+     * @author Víctor Lamas
+     */
+    private suspend fun getFavWords() {
+
     }
 }
