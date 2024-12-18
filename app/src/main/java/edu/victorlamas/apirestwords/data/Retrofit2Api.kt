@@ -30,5 +30,5 @@ class Retrofit2Api {
  */
 interface Retrofit2ApiInterface {
     @GET("all")
-    suspend fun getWords(): List<Word>
+    suspend fun getAllApiWords(): List<Word>
 }

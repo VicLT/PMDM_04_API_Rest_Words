@@ -1,9 +1,7 @@
 package edu.victorlamas.apirestwords.data
 
 import edu.victorlamas.apirestwords.model.Word
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.runBlocking
 
 /**
  * Class WordsRepository.kt
@@ -17,26 +15,19 @@ class WordsRepository(
     private val remoteDataSource: RemoteDataSource,
     private val localDataSource: LocalDataSource
 ) {
-    fun fetchWords(): Flow<List<Word>> {
-        return remoteDataSource.fetchWords()
+    fun getAllApiWords(): Flow<List<Word>> {
+        return remoteDataSource.getAllApiWords()
     }
 
-    /**
-     * Guarda las propiedades de una palabra y bloquea el hilo hasta que termine.
-     * @author Víctor Lamas
-     *
-     * @param word Id, nombre, descripción y estado de favorito.
-     */
-    fun saveWord(word: Word) = runBlocking {
-        localDataSource.insertWord(word)
-        delay(10)
+    fun getFavWords(): Flow<List<Word>> {
+        return localDataSource.getFavWords()
     }
 
-    fun getWords(): Flow<List<Word>> {
-        return localDataSource.getAllWords()
-    }
-
-    suspend fun deleteWord(word: Word) {
-        localDataSource.deleteWord(word)
+    suspend fun updateFavWord(favWord: Word) {
+        if (favWord.favourite) {
+            localDataSource.saveFavWord(favWord)
+        } else {
+            localDataSource.deleteFavWord(favWord)
+        }
     }
 }

@@ -20,6 +20,9 @@ import edu.victorlamas.apirestwords.databinding.ActivityMainBinding
 import edu.victorlamas.apirestwords.utils.WordsFilter
 import edu.victorlamas.apirestwords.utils.checkConnection
 import edu.victorlamas.apirestwords.utils.wordsFilter
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -42,13 +45,17 @@ class MainActivity : AppCompatActivity() {
                 .show()
         },
         onClickFav = { word ->
+            word.favourite = !word.favourite
+            vm.updateWord(word)
+        }
+        /*onClickFav = { word ->
             if (word.favourite) {
-                vm.deleteWord(word)
+                vm.deleteFavWord(word)
             } else {
-                vm.saveWord(word)
+                vm.saveFavWord(word)
             }
             word.favourite = !word.favourite
-        }
+        }*/
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -111,24 +118,28 @@ class MainActivity : AppCompatActivity() {
     private suspend fun getWords() {
         if (checkConnection(this)) {
             binding.swipeRefresh.isRefreshing = true
-            vm.words.collect { words ->
-                /*val sortedWords = when (wordsFilter) {
-                    WordsFilter.ALPHABETICAL_ASCENDANT -> words.sortedBy {
-                        word -> word.word }
-                    WordsFilter.ALPHABETICAL_DESCENDANT -> words.sortedByDescending {
-                        word -> word.word }
+            combine(vm.words, vm.favWords) { apiWords, favWords ->
+                apiWords.forEach { apiWord ->
+                    val wordAux = favWords.find { favWord ->
+                        apiWord.idWord == favWord.idWord
+                    }
+                    apiWord.favourite = wordAux != null
                 }
-                adapter.submitList(sortedWords)*/
-
-                /*when (wordsFilter) {
-                    WordsFilter.ALPHABETICAL_ASCENDANT -> words.sortedBy {
-                        word -> word.word }
-                    WordsFilter.ALPHABETICAL_DESCENDANT -> words.sortedByDescending {
-                        word -> word.word }
-                }*/
-                adapter.submitList(words)
+                val sortedWords = when (wordsFilter) {
+                    WordsFilter.ALPHABETICAL_ASCENDANT -> apiWords.sortedBy {
+                            word -> word.word }
+                    WordsFilter.ALPHABETICAL_DESCENDANT -> apiWords.sortedByDescending {
+                            word -> word.word }
+                }
+                adapter.submitList(sortedWords)
                 binding.swipeRefresh.isRefreshing = false
-            }
+            }.catch {
+                Toast.makeText(
+                    this@MainActivity,
+                    it.message,
+                    Toast.LENGTH_SHORT
+                ).show()
+            }.collect()
         } else {
             binding.swipeRefresh.isRefreshing = false
             Toast.makeText(

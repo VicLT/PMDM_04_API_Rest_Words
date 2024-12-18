@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.flow
 class RemoteDataSource {
     private val api = Retrofit2Api.getRetrofit2Api()
 
-    fun fetchWords() = flow {
-        emit(api.getWords())
+    fun getAllApiWords() = flow {
+        emit(api.getAllApiWords())
     }
 }

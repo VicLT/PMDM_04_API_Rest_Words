@@ -27,11 +27,11 @@ abstract class WordsDatabase : RoomDatabase() {
 @Dao
 interface WordsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertWord(word: Word)
+    suspend fun saveFavWord(word: Word)
 
     @Query("SELECT * FROM Word")
-    fun getAllWords(): Flow<List<Word>>
+    fun getFavWords(): Flow<List<Word>>
 
     @Delete
-    suspend fun deleteWord(word: Word)
+    suspend fun deleteFavWord(word: Word)
 }

@@ -21,7 +21,4 @@ data class Word(
     var definition: String? = null,
     @Ignore
     var favourite: Boolean = false
-) /*{
-    constructor(idWord: Int, word: String?, definition: String?) :
-            this(idWord, word, definition, false)
-}*/
+)

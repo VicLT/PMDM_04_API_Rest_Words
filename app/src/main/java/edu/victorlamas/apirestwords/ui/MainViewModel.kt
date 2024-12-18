@@ -1,19 +1,13 @@
 package edu.victorlamas.apirestwords.ui
 
-import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import edu.victorlamas.apirestwords.data.WordsRepository
 import edu.victorlamas.apirestwords.model.Word
-import edu.victorlamas.apirestwords.utils.WordsFilter
-import edu.victorlamas.apirestwords.utils.wordsFilter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 /**
@@ -29,8 +23,14 @@ class MainViewModel (private val repository: WordsRepository) : ViewModel() {
     val words: StateFlow<List<Word>>
         get() = _words.asStateFlow()
 
+    private var _favWords: MutableStateFlow<List<Word>> =
+        MutableStateFlow(emptyList())
+    val favWords: StateFlow<List<Word>>
+        get() = _favWords.asStateFlow()
+
     init {
         getAllWords()
+        getFavouriteWords()
     }
 
     /**
@@ -38,50 +38,30 @@ class MainViewModel (private val repository: WordsRepository) : ViewModel() {
      */
     private fun getAllWords() {
         viewModelScope.launch {
-            combine(repository.fetchWords(), repository.getWords()) { remoteWords, localWords ->
-                remoteWords.forEach { remoteWord ->
-                    val wordAux = localWords.find { localWord ->
-                        remoteWord.idWord == localWord.idWord
-                    }
-                    remoteWord.favourite = wordAux != null
-                }
-                /*val sortedWords = when (wordsFilter) {
-                    WordsFilter.ALPHABETICAL_ASCENDANT -> remoteWords.sortedBy {
-                            word -> word.word?.uppercase()
-                    }
-                    WordsFilter.ALPHABETICAL_DESCENDANT -> remoteWords.sortedByDescending {
-                            word -> word.word?.uppercase()
-                    }
-                }*/
-                _words.value = remoteWords
-            }.collect()
-        }
-    }
-    /*private fun getAllWords() {
-        viewModelScope.launch {
-            repository.fetchWords().collect { words ->
+            repository.getAllApiWords().collect { words ->
                 _words.value = words
             }
         }
-    }*/
+    }
 
     /**
-     * Guardar una palabra en la base de datos local.
-     * @param word Id, nombre y descripción.
+     * Obtener el listado de palabras favoritas de la base de datos local.
      */
-    fun saveWord(word: Word) {
+    private fun getFavouriteWords() {
         viewModelScope.launch {
-            repository.saveWord(word)
+            repository.getFavWords().collect { words ->
+                _favWords.value = words
+            }
         }
     }
 
     /**
-     * Eliminar una palabra en la base de datos local.
-     * @param word Id, nombre y descripción.
+     * Insertar o borrar una palabra favorita en la base de datos local.
+     * @param word Id, nombre, descripción y estado favorita.
      */
-    fun deleteWord(word: Word) {
+    fun updateWord(word: Word) {
         viewModelScope.launch {
-            repository.deleteWord(word)
+            repository.updateFavWord(word)
         }
     }
 }
