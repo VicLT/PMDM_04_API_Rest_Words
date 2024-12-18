@@ -11,6 +11,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import edu.victorlamas.apirestwords.R
 import edu.victorlamas.apirestwords.RoomApplication
 import edu.victorlamas.apirestwords.data.LocalDataSource
@@ -21,7 +23,6 @@ import edu.victorlamas.apirestwords.utils.WordsFilter
 import edu.victorlamas.apirestwords.utils.checkConnection
 import edu.victorlamas.apirestwords.utils.wordsFilter
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
@@ -48,14 +49,6 @@ class MainActivity : AppCompatActivity() {
             word.favourite = !word.favourite
             vm.updateWord(word)
         }
-        /*onClickFav = { word ->
-            if (word.favourite) {
-                vm.deleteFavWord(word)
-            } else {
-                vm.saveFavWord(word)
-            }
-            word.favourite = !word.favourite
-        }*/
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,7 +68,18 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        val layoutManager = LinearLayoutManager(this)
+        binding.recyclerView.layoutManager = layoutManager
         binding.recyclerView.adapter = adapter
+
+        adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                super.onItemRangeInserted(positionStart, itemCount)
+                if (positionStart == 0 && positionStart == layoutManager.findFirstCompletelyVisibleItemPosition()) {
+                    binding.recyclerView.scrollToPosition(0)
+                }
+            }
+        })
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -116,6 +120,7 @@ class MainActivity : AppCompatActivity() {
      * @author Víctor Lamas
      */
     private suspend fun getWords() {
+        adapter.submitList(emptyList())
         if (checkConnection(this)) {
             binding.swipeRefresh.isRefreshing = true
             combine(vm.words, vm.favWords) { apiWords, favWords ->
@@ -127,19 +132,23 @@ class MainActivity : AppCompatActivity() {
                 }
                 val sortedWords = when (wordsFilter) {
                     WordsFilter.ALPHABETICAL_ASCENDANT -> apiWords.sortedBy {
-                            word -> word.word }
+                            word -> word.word?.uppercase()
+                    }
                     WordsFilter.ALPHABETICAL_DESCENDANT -> apiWords.sortedByDescending {
-                            word -> word.word }
+                        word -> word.word?.uppercase()
+                    }
                 }
-                adapter.submitList(sortedWords)
-                binding.swipeRefresh.isRefreshing = false
+                sortedWords
             }.catch {
                 Toast.makeText(
                     this@MainActivity,
                     it.message,
                     Toast.LENGTH_SHORT
                 ).show()
-            }.collect()
+            }.collect { sortedWords ->
+                adapter.submitList(sortedWords)
+                binding.swipeRefresh.isRefreshing = false
+            }
         } else {
             binding.swipeRefresh.isRefreshing = false
             Toast.makeText(

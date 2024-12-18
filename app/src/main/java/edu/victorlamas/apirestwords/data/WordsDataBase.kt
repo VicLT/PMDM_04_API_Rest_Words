@@ -29,8 +29,11 @@ interface WordsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveFavWord(word: Word)
 
-    @Query("SELECT * FROM Word")
-    fun getFavWords(): Flow<List<Word>>
+    @Query("SELECT * FROM Word ORDER BY word ASC")
+    fun getFavWordsAsc(): Flow<List<Word>>
+
+    @Query("SELECT * FROM Word ORDER BY word DESC")
+    fun getFavWordsDesc(): Flow<List<Word>>
 
     @Delete
     suspend fun deleteFavWord(word: Word)

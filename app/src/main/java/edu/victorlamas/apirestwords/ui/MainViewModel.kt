@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import edu.victorlamas.apirestwords.data.WordsRepository
 import edu.victorlamas.apirestwords.model.Word
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,14 +24,10 @@ class MainViewModel (private val repository: WordsRepository) : ViewModel() {
     val words: StateFlow<List<Word>>
         get() = _words.asStateFlow()
 
-    private var _favWords: MutableStateFlow<List<Word>> =
-        MutableStateFlow(emptyList())
-    val favWords: StateFlow<List<Word>>
-        get() = _favWords.asStateFlow()
+    var favWords: Flow<List<Word>> = repository.getFavWords()
 
     init {
         getAllWords()
-        getFavouriteWords()
     }
 
     /**
@@ -40,17 +37,6 @@ class MainViewModel (private val repository: WordsRepository) : ViewModel() {
         viewModelScope.launch {
             repository.getAllApiWords().collect { words ->
                 _words.value = words
-            }
-        }
-    }
-
-    /**
-     * Obtener el listado de palabras favoritas de la base de datos local.
-     */
-    private fun getFavouriteWords() {
-        viewModelScope.launch {
-            repository.getFavWords().collect { words ->
-                _favWords.value = words
             }
         }
     }

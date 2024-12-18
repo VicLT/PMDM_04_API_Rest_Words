@@ -15,8 +15,12 @@ class LocalDataSource(private val db: WordsDao) {
         db.saveFavWord(word)
     }
 
-    fun getFavWords(): Flow<List<Word>> {
-        return db.getFavWords()
+    fun getFavWordsAsc(): Flow<List<Word>> {
+        return db.getFavWordsAsc()
+    }
+
+    fun getFavWordsDesc(): Flow<List<Word>> {
+        return db.getFavWordsDesc()
     }
 
     suspend fun deleteFavWord(word: Word) {

@@ -1,6 +1,8 @@
 package edu.victorlamas.apirestwords.data
 
 import edu.victorlamas.apirestwords.model.Word
+import edu.victorlamas.apirestwords.utils.WordsFilter
+import edu.victorlamas.apirestwords.utils.wordsFilter
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -20,7 +22,10 @@ class WordsRepository(
     }
 
     fun getFavWords(): Flow<List<Word>> {
-        return localDataSource.getFavWords()
+        return when (wordsFilter) {
+            WordsFilter.ALPHABETICAL_ASCENDANT -> localDataSource.getFavWordsAsc()
+            WordsFilter.ALPHABETICAL_DESCENDANT -> localDataSource.getFavWordsDesc()
+        }
     }
 
     suspend fun updateFavWord(favWord: Word) {
