@@ -4,15 +4,13 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import edu.victorlamas.apirestwords.R
 import edu.victorlamas.apirestwords.RoomApplication
 import edu.victorlamas.apirestwords.data.LocalDataSource
@@ -39,7 +37,7 @@ class MainActivity : AppCompatActivity() {
 
     private val adapter = WordsAdapter(
         onClick = { word ->
-            AlertDialog.Builder(this)
+            MaterialAlertDialogBuilder(this)
                 .setTitle(word.word)
                 .setMessage(word.definition)
                 .setPositiveButton(getString(R.string.btn_alert_dialog), null)
@@ -68,7 +66,7 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        val layoutManager = LinearLayoutManager(this)
+        /*val layoutManager = LinearLayoutManager(this)
         binding.recyclerView.layoutManager = layoutManager
         binding.recyclerView.adapter = adapter
 
@@ -79,7 +77,9 @@ class MainActivity : AppCompatActivity() {
                     binding.recyclerView.scrollToPosition(0)
                 }
             }
-        })
+        })*/
+
+        binding.recyclerView.adapter = adapter
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -116,7 +116,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Obtiene las palabras y las muestra en el RecyclerView.
+     * Obtiene las palabras, las ordena y las muestra en el RecyclerView.
      * @author Víctor Lamas
      */
     private suspend fun getWords() {
@@ -138,7 +138,7 @@ class MainActivity : AppCompatActivity() {
                         word -> word.word?.uppercase()
                     }
                 }
-                sortedWords
+                return@combine sortedWords
             }.catch {
                 Toast.makeText(
                     this@MainActivity,
