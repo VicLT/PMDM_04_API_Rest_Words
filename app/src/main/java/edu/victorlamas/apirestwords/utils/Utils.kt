@@ -28,8 +28,18 @@ fun checkConnection(context: Context): Boolean {
 }
 
 enum class WordsFilter {
-    ALPHABETICAL_ASCENDANT,
-    ALPHABETICAL_DESCENDANT
+    ALPHA_ASC,
+    ALPHA_DESC
+    /*REMOTE_ALPHABETICAL_ASCENDANT,
+    REMOTE_ALPHABETICAL_DESCENDANT,
+    LOCAL_ALPHABETICAL_ASCENDANT,
+    LOCAL_ALPHABETICAL_DESCENDANT*/
 }
 
-var wordsFilter = WordsFilter.ALPHABETICAL_ASCENDANT
+/*enum class FavWordsFilter {
+    ALPHA_ASC,
+    ALPHA_DESC
+}*/
+
+var wordsFilter = WordsFilter.ALPHA_ASC
+//var favWordsFilter = FavWordsFilter.ALPHA_ASC
