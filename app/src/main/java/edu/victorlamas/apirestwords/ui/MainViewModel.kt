@@ -93,7 +93,7 @@ class MainViewModel (private val repository: WordsRepository) : ViewModel() {
     /**
      * Recupera las palabras favoritas ordenadas de la BD local.
      */
-    fun getFavWords() {
+    private fun getFavWords() {
         viewModelScope.launch {
             repository.getSortedFavWords(filter = wordsFilter).collect {
                 _favWords.value = it.map { word ->
