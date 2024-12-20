@@ -38,22 +38,23 @@ class WordsAdapter(
 
     inner class WordsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         private val bind = WordItemBinding.bind(view)
-            fun bind(word: Word) {
-                bind.tvWord.text = word.word
-                bind.root.setOnClickListener {
-                    onClick(word)
-                }
-                bind.ivFav.setOnClickListener {
-                    onClickFav(word)
-                    notifyItemChanged(adapterPosition)
-                }
-                bind.ivFav.setImageState(
-                    intArrayOf(R.attr.state_on),
-                    word.favourite
-                )
+        fun bind(word: Word) {
+            bind.tvWord.text = word.word
+            bind.root.setOnClickListener {
+                onClick(word)
             }
+            bind.ivFav.setOnClickListener {
+                onClickFav(word)
+                word.favourite = !word.favourite
+                notifyItemChanged(adapterPosition)
+            }
+            bind.ivFav.setImageState(
+                intArrayOf(R.attr.state_on),
+                word.favourite
+            )
         }
     }
+}
 
 /**
  * Class WordsAdapter.kt

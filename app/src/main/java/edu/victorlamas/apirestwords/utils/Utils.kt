@@ -30,16 +30,6 @@ fun checkConnection(context: Context): Boolean {
 enum class WordsFilter {
     ALPHA_ASC,
     ALPHA_DESC
-    /*REMOTE_ALPHABETICAL_ASCENDANT,
-    REMOTE_ALPHABETICAL_DESCENDANT,
-    LOCAL_ALPHABETICAL_ASCENDANT,
-    LOCAL_ALPHABETICAL_DESCENDANT*/
 }
 
-/*enum class FavWordsFilter {
-    ALPHA_ASC,
-    ALPHA_DESC
-}*/
-
 var wordsFilter = WordsFilter.ALPHA_ASC
-//var favWordsFilter = FavWordsFilter.ALPHA_ASC

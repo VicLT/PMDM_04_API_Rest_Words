@@ -1,6 +1,7 @@
 package edu.victorlamas.apirestwords.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -13,18 +14,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import edu.victorlamas.apirestwords.R
 import edu.victorlamas.apirestwords.RoomApplication
-import edu.victorlamas.apirestwords.data.GetWordsUseCase
 import edu.victorlamas.apirestwords.data.LocalDataSource
 import edu.victorlamas.apirestwords.data.RemoteDataSource
 import edu.victorlamas.apirestwords.data.WordsRepository
 import edu.victorlamas.apirestwords.databinding.ActivityMainBinding
 import edu.victorlamas.apirestwords.model.Word
-import edu.victorlamas.apirestwords.utils.WordsFilter
 import edu.victorlamas.apirestwords.utils.checkConnection
-import edu.victorlamas.apirestwords.utils.wordsFilter
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.count
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -37,8 +33,7 @@ class MainActivity : AppCompatActivity() {
         val localDataSource = LocalDataSource(db.wordDao())
         val remoteDataSource = RemoteDataSource()
         val repository = WordsRepository(remoteDataSource, localDataSource)
-        val useCase = GetWordsUseCase(repository)
-        MainViewModelFactory(useCase, repository)
+        MainViewModelFactory(repository)
     }
 
     private val adapter = WordsAdapter(
@@ -46,14 +41,13 @@ class MainActivity : AppCompatActivity() {
             showWord(word)
         },
         onClickFav = { word ->
-            word.favourite = !word.favourite
             vm.updateWord(word)
         }
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //enableEdgeToEdge()
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
@@ -68,61 +62,33 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        /*val layoutManager = LinearLayoutManager(this)
-        binding.recyclerView.layoutManager = layoutManager
-        binding.recyclerView.adapter = adapter
-
-        adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
-            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-                super.onItemRangeInserted(positionStart, itemCount)
-                if (positionStart == 0 && positionStart == layoutManager.findFirstCompletelyVisibleItemPosition()) {
-                    binding.recyclerView.scrollToPosition(0)
-                }
-            }
-        })*/
-
         binding.recyclerView.adapter = adapter
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                getAllWords("all", false)
+                drawAllWords()
             }
         }
-        //getAllWords(false)
     }
 
     override fun onStart() {
         super.onStart()
 
         binding.swipeRefresh.setOnRefreshListener {
-            getAllWords("all", false)
+            Log.d("MainActivity", "refreshing swipeRefresh")
+            vm.getApiWords()
         }
 
         binding.mToolbar.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.opt_sort -> {
-                    wordsFilter =
-                        if (wordsFilter == WordsFilter.ALPHA_ASC) {
-                            WordsFilter.ALPHA_DESC
-                        } else {
-                            WordsFilter.ALPHA_ASC
-                        }
-                    if (binding.bottomNavigationView.selectedItemId == R.id.opt_allWords) {
-                        getAllWords("all", true)
-                    } else if (binding.bottomNavigationView.selectedItemId == R.id.opt_favWords) {
-                        //getFavWords(true)
-                        getAllWords("fav", true)
-                    }
+                    vm.sortWords()
+                    currentScrollPosition = 0
+                    currentFavScrollPosition = 0
                     true
                 }
                 R.id.opt_random -> {
-                    if (binding.bottomNavigationView.selectedItemId == R.id.opt_allWords) {
-                        val randomWord = vm.words.value.random()
-                        showWord(randomWord)
-                    } else if (binding.bottomNavigationView.selectedItemId == R.id.opt_favWords) {
-                        //val randomWord = vm.favWords.value.random()
-                        //showWord(randomWord)
-                    }
+                    showWord(vm.getRandomWord())
                     true
                 }
                 else -> false
@@ -132,18 +98,15 @@ class MainActivity : AppCompatActivity() {
         binding.bottomNavigationView.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.opt_allWords -> {
-                    binding.swipeRefresh.isEnabled = true
                     currentFavScrollPosition = saveScrollPosition()
-                    //Log.d("Scroll", "Fav: $currentFavScrollPosition")
-                    getAllWords("all", false)
+                    vm.isFavouriteWordsSelected = false
+                    binding.swipeRefresh.isEnabled = true
                     true
                 }
                 R.id.opt_favWords -> {
-                    binding.swipeRefresh.isEnabled = false
                     currentScrollPosition = saveScrollPosition()
-                    //Log.d("Scroll", "Normal: $currentScrollPosition")
-                    //getFavWords(false)
-                    getAllWords("fav", false)
+                    vm.isFavouriteWordsSelected = true
+                    binding.swipeRefresh.isEnabled = false
                     true
                 }
                 else -> false
@@ -153,131 +116,35 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * Obtiene todas las palabras de la API, las ordena y las muestra en el RV.
-     * @param returnToTop Si es true, vuelve a la posición 0, de lo contrario,
      * restaura la posición guardada.
      * @author Víctor Lamas
      */
-    private fun getAllWords(wordsType: String, returnToTop: Boolean) {
+    private suspend fun drawAllWords(returnToTop: Boolean = false) {
+        adapter.submitList(emptyList())
         if (checkConnection(this)) {
-            lifecycleScope.launch {
-                binding.swipeRefresh.isRefreshing = true
-                vm.getAllWords(wordsType)
-                vm.words.collect { word ->
-                    adapter.submitList(word)
-                    binding.swipeRefresh.isRefreshing = false
-                }
-            }
+            binding.swipeRefresh.isRefreshing = true
 
-        } else {
-            binding.swipeRefresh.isRefreshing = false
-            Toast.makeText(
-                this@MainActivity,
-                getString(R.string.txt_noConnection),
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-    }
-    /*private fun getAllWords(returnToTop: Boolean) {
-        //adapter.submitList(emptyList())
-        if (checkConnection(this)/* &&
-            binding.bottomNavigationView.selectedItemId == R.id.opt_allWords*/) {
-
-
-            lifecycleScope.launch {
-                binding.swipeRefresh.isRefreshing = true
-                combine(vm.words, vm.favWords) { apiWords, favWords ->
-                    apiWords.forEach { apiWord ->
-                        apiWord.favourite = favWords.any { favWord ->
-                            favWord.idWord == apiWord.idWord }
-                    }
-                    /*val sortedWords = when (wordsFilter) {
-                        WordsFilter.ALPHA_ASC -> apiWords.sortedBy { word ->
-                            word.word?.uppercase()
-                        }
-                        WordsFilter.ALPHA_DESC -> apiWords.sortedByDescending { word ->
-                            word.word?.uppercase()
-                        }
-                    }
-                    return@combine sortedWords*/
-                    binding.swipeRefresh.isRefreshing = false
-                    apiWords
-                }.catch {
-                    Toast.makeText(
-                        this@MainActivity,
-                        it.message,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }.collect { sortedWords ->
-                    adapter.submitList(when (wordsFilter) {
-                        WordsFilter.ALPHA_ASC -> sortedWords.sortedBy { word ->
-                            word.word?.uppercase()
-                        }
-                        WordsFilter.ALPHA_DESC -> sortedWords.sortedByDescending { word ->
-                            word.word?.uppercase()
-                        }
-                    }) {
-                        if (returnToTop) {
-                            scrollToTop()
-                        } else {
-                            restoreScrollPosition(currentScrollPosition)
-                        }
-                    }
-                    /*if (binding.bottomNavigationView.selectedItemId == R.id.opt_allWords) {
-                        adapter.submitList(sortedWords)
-                    }*/
-                    //binding.swipeRefresh.isRefreshing = false
-                }
-            }
-        } else {
-            binding.swipeRefresh.isRefreshing = false
-            Toast.makeText(
-                this@MainActivity,
-                getString(R.string.txt_noConnection),
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-    }*/
-
-    /**
-     * Obtiene las palabras favoritas de Room, las ordena y las muestra en el RV.
-     * @param returnToTop Si es true, vuelve a la posición 0, de lo contrario,
-     * restaura la posición guardada.
-     * @author Víctor Lamas
-     */
-    private fun getFavWords(returnToTop: Boolean) {
-        //adapter.submitList(emptyList())
-        //vm.getSortedFavWords()
-        /*if (binding.bottomNavigationView.selectedItemId == R.id.opt_favWords) {
-            lifecycleScope.launch {
-                vm.favWords.collect { favWords ->
-                    favWords.forEach { favWord ->
-                        favWord.favourite = true
-                    }
-                    adapter.submitList(favWords) {
-                        if (returnToTop) {
-                            scrollToTop()
-                        } else {
-                            restoreScrollPosition(currentFavScrollPosition)
-                        }
-                    }
-                }
-            }
-        }*/
-
-        /*lifecycleScope.launch {
-            vm.favWords.collect { favWords ->
-                favWords.forEach { favWord ->
-                    favWord.favourite = true
-                }
-                adapter.submitList(favWords) {
+            vm.words.collectLatest { words ->
+                adapter.submitList(words) {
                     if (returnToTop) {
-                        scrollToTop()
-                    } else {
+                        binding.recyclerView.scrollToPosition(0)
+                    } else if (vm.isFavouriteWordsSelected) {
                         restoreScrollPosition(currentFavScrollPosition)
+                    } else {
+                        restoreScrollPosition(currentScrollPosition)
                     }
                 }
+
+                binding.swipeRefresh.isRefreshing = false
             }
-        }*/
+        } else {
+            binding.swipeRefresh.isRefreshing = false
+            Toast.makeText(
+                this@MainActivity,
+                getString(R.string.txt_noConnection),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 
     /**
@@ -301,15 +168,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Desplaza el RecyclerView a la posición 0.
-     * @author Víctor Lamas
-     */
-    private fun scrollToTop() {
-        binding.recyclerView.scrollToPosition(0)
-    }
-
-    /**
-     * Muestra una palabra en un MaterialAlertDialog.
+     * Muestra una palabra (aleatoria) en un MaterialAlertDialog.
      * @param word Palabra con título y descripción.
      * @author Víctor Lamas
      */
@@ -318,6 +177,12 @@ class MainActivity : AppCompatActivity() {
             MaterialAlertDialogBuilder(this)
                 .setTitle(word.word)
                 .setMessage(word.definition)
+                .setPositiveButton(getString(R.string.btn_alert_dialog), null)
+                .show()
+        } else {
+            MaterialAlertDialogBuilder(this)
+                .setTitle(getString(R.string.warning_title))
+                .setMessage(getString(R.string.warning_message))
                 .setPositiveButton(getString(R.string.btn_alert_dialog), null)
                 .show()
         }
