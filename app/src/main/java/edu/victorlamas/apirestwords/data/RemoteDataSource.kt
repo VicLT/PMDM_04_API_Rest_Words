@@ -1,7 +1,5 @@
 package edu.victorlamas.apirestwords.data
 
-import edu.victorlamas.apirestwords.model.Word
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 
 /**

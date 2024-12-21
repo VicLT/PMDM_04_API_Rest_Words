@@ -48,15 +48,6 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.room.ktx)
-    implementation(libs.androidx.room.runtime)
-    annotationProcessor(libs.androidx.room.compiler)
-    ksp(libs.androidx.room.compiler)
-    implementation(libs.retrofit)
-    implementation(libs.converter.gson)
-    implementation(libs.glide)
-    implementation(libs.androidx.swiperefreshlayout)
-    implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -67,4 +58,27 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    
+    // Coroutines test
+    implementation(libs.coroutines.test)
+    testImplementation(libs.coroutines.test)
+
+    // Room
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.runtime)
+    annotationProcessor(libs.androidx.room.compiler)
+    ksp(libs.androidx.room.compiler)
+
+    // Retrofit
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+
+    // Glide
+    implementation(libs.glide)
+
+    // SwipeRefreshLayout
+    implementation(libs.androidx.swiperefreshlayout)
+
+    // ViewModelScope from ActivityX
+    implementation(libs.androidx.activity.ktx)
 }

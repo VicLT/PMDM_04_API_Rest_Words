@@ -35,6 +35,8 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 play-services-cast = { group = "com.google.android.gms", name = "play-services-cast", version.ref = "playServicesCast" }
 androidx-lifecycle-common-jvm = { group = "androidx.lifecycle", name = "lifecycle-common-jvm", version.ref = "lifecycleCommonJvm" }
+#Coroutines test
+coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version = "1.9.0" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
