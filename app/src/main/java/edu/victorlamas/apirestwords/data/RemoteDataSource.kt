@@ -1,5 +1,7 @@
 package edu.victorlamas.apirestwords.data
 
+import edu.victorlamas.apirestwords.model.Word
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 
 /**
@@ -10,6 +12,10 @@ import kotlinx.coroutines.flow.flow
 class RemoteDataSource {
     private val api = Retrofit2Api.getRetrofit2Api()
 
+    /**
+     * Obtiene todas las palabras de la API.
+     * @return Flujo caliente de lista de palabras.
+     */
     fun getAllApiWords() = flow {
         emit(api.getAllApiWords())
     }

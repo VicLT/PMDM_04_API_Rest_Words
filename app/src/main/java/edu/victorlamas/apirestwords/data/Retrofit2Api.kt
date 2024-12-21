@@ -27,6 +27,8 @@ class Retrofit2Api {
 /**
  * Obtiene todas las palabras de la API.
  * @author Víctor Lamas
+ *
+ * @return Lista de palabras.
  */
 interface Retrofit2ApiInterface {
     @GET("all")

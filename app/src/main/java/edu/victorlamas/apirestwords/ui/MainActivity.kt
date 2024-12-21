@@ -1,7 +1,6 @@
 package edu.victorlamas.apirestwords.ui
 
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -20,7 +19,6 @@ import edu.victorlamas.apirestwords.data.WordsRepository
 import edu.victorlamas.apirestwords.databinding.ActivityMainBinding
 import edu.victorlamas.apirestwords.model.Word
 import edu.victorlamas.apirestwords.utils.checkConnection
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /**
@@ -51,6 +49,10 @@ class MainActivity : AppCompatActivity() {
         }
     )
 
+    /**
+     * Inicializa la UI y muestra las palabras en el RecyclerView.
+     * @param savedInstanceState Estado de la actividad.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -77,11 +79,24 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Inicializa el menú superior y la navegación inferior.
+     * Actualiza las palabras de la API si hay conexión.
+     */
     override fun onStart() {
         super.onStart()
 
         binding.swipeRefresh.setOnRefreshListener {
-            vm.getApiWords()
+            if (checkConnection(this)) {
+                vm.getApiWords()
+            } else {
+                binding.swipeRefresh.isRefreshing = false
+                Toast.makeText(
+                    this@MainActivity,
+                    getString(R.string.txt_noConnection),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
 
         binding.mToolbar.setOnMenuItemClickListener { menuItem ->
@@ -121,8 +136,8 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * Obtiene todas las palabras de la API, las ordena y las muestra en el RV.
-     * restaura la posición guardada.
-     * @author Víctor Lamas
+     * Restaura la última posición visualizada.
+     * @param returnToTop Volver al principio del RecyclerView.
      */
     private suspend fun drawAllWords(returnToTop: Boolean = false) {
         adapter.submitList(emptyList())
@@ -155,7 +170,7 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * Guarda la posición actual del RecyclerView.
-     * @author Víctor Lamas
+     * @return Posición actual del RecyclerView.
      */
     private fun saveScrollPosition(): Int {
         val layoutManager = binding.recyclerView.layoutManager as? LinearLayoutManager
@@ -164,7 +179,7 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * Restaura la posición guardada en el RecyclerView.
-     * @author Víctor Lamas
+     * @param scrollPosition Posición guardada.
      */
     private fun restoreScrollPosition(scrollPosition: Int) {
         binding.recyclerView.post {
@@ -175,8 +190,7 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * Muestra una palabra (aleatoria) en un MaterialAlertDialog.
-     * @param word Palabra con título y descripción.
-     * @author Víctor Lamas
+     * @param word Palabra de la lista mostrada.
      */
     private fun showWord(word: Word?) {
         if (word != null) {

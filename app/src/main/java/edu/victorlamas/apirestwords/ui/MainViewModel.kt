@@ -1,7 +1,6 @@
 package edu.victorlamas.apirestwords.ui
 
 import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -64,15 +63,13 @@ class MainViewModel (private val repository: WordsRepository) : ViewModel() {
      */
     fun updateWord(word: Word) {
         viewModelScope.launch {
-            //val favWord = word.copy(favourite = word.favourite.not())
-            //repository.updateFavWord(favWord)
             repository.updateFavWord(word)
         }
     }
 
     /**
      * Busca en la lista una palabra aleatoria.
-     * @return Palabra con nombre y descripción.
+     * @return Palabra con nombre y descripción o null.
      */
     fun getRandomWord(): Word? =
         if (isFavouriteWordsSelected) {
@@ -85,6 +82,7 @@ class MainViewModel (private val repository: WordsRepository) : ViewModel() {
      * Recupera las palabras de la API.
      */
     fun getApiWords() {
+        _apiWords.value = emptyList()
         viewModelScope.launch {
             repository.getAllApiWords().collect {
                 _apiWords.value = it
@@ -134,6 +132,8 @@ class MainViewModel (private val repository: WordsRepository) : ViewModel() {
 
     /**
      * Ordena las palabras de la lista combinada.
+     * @param words Lista de palabras.
+     * @return Lista de palabras ordenadas.
      */
     private fun sortByWordsFilter(words: List<Word>): List<Word> {
         return when (wordsFilter) {
@@ -148,6 +148,11 @@ class MainViewModel (private val repository: WordsRepository) : ViewModel() {
     }
 }
 
+/**
+ * Clase MainViewModelFactory.kt
+ * Crea una instancia de MainViewModel.
+ * @param repository Permite recuperar todas las palabras y sus propiedades.
+ */
 @Suppress("UNCHECKED_CAST")
 class MainViewModelFactory(private val repository: WordsRepository)
     : ViewModelProvider.Factory {
