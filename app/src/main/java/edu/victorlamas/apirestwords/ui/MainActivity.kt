@@ -23,6 +23,11 @@ import edu.victorlamas.apirestwords.utils.checkConnection
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
+/**
+ * Class MainActivity.kt
+ * Gestiona las operaciones y el estado de los datos en la UI.
+ * @author Víctor Lamas
+ */
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private var currentScrollPosition = 0
@@ -41,6 +46,7 @@ class MainActivity : AppCompatActivity() {
             showWord(word)
         },
         onClickFav = { word ->
+            word.favourite = !word.favourite
             vm.updateWord(word)
         }
     )
@@ -75,7 +81,6 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
 
         binding.swipeRefresh.setOnRefreshListener {
-            Log.d("MainActivity", "refreshing swipeRefresh")
             vm.getApiWords()
         }
 
@@ -121,10 +126,11 @@ class MainActivity : AppCompatActivity() {
      */
     private suspend fun drawAllWords(returnToTop: Boolean = false) {
         adapter.submitList(emptyList())
+
         if (checkConnection(this)) {
             binding.swipeRefresh.isRefreshing = true
 
-            vm.words.collectLatest { words ->
+            vm.words.collect { words ->
                 adapter.submitList(words) {
                     if (returnToTop) {
                         binding.recyclerView.scrollToPosition(0)

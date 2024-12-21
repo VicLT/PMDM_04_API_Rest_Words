@@ -45,7 +45,7 @@ class WordsAdapter(
             }
             bind.ivFav.setOnClickListener {
                 onClickFav(word)
-                word.favourite = !word.favourite
+                //word.favourite = !word.favourite
                 notifyItemChanged(adapterPosition)
             }
             bind.ivFav.setImageState(

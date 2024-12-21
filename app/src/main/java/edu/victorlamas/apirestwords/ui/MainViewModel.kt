@@ -1,6 +1,7 @@
 package edu.victorlamas.apirestwords.ui
 
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -11,6 +12,7 @@ import edu.victorlamas.apirestwords.utils.wordsFilter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
@@ -62,8 +64,9 @@ class MainViewModel (private val repository: WordsRepository) : ViewModel() {
      */
     fun updateWord(word: Word) {
         viewModelScope.launch {
-            val favWord = word.copy(favourite = word.favourite.not())
-            repository.updateFavWord(favWord)
+            //val favWord = word.copy(favourite = word.favourite.not())
+            //repository.updateFavWord(favWord)
+            repository.updateFavWord(word)
         }
     }
 
@@ -84,7 +87,6 @@ class MainViewModel (private val repository: WordsRepository) : ViewModel() {
     fun getApiWords() {
         viewModelScope.launch {
             repository.getAllApiWords().collect {
-                Log.d("MainViewModel", "refreshing getApiWords")
                 _apiWords.value = it
             }
         }
@@ -116,6 +118,8 @@ class MainViewModel (private val repository: WordsRepository) : ViewModel() {
                             favWord.idWord == apiWord.idWord }
                     }
                 }
+            }.catch { exception ->
+                Log.e("MainViewModel", exception.message.toString())
             }.collect { words ->
                 _words.value = if (isFavouriteWordsSelected) {
                     sortByWordsFilter(words.filter { word
